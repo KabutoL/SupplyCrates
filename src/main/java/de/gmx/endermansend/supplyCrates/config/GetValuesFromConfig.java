@@ -11,7 +11,6 @@ import java.util.Set;
 public class GetValuesFromConfig {
 
     ConfigHandler config;
-    // TODO: Add cache for config values
 
     GetValuesFromConfig(ConfigHandler config) {
         this.config = config;
