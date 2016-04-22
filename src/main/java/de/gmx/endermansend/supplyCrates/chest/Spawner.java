@@ -25,6 +25,11 @@ public class Spawner extends BukkitRunnable {
 
     private List<KeyValuePair> chestOccurrences;
 
+    /**
+     * Continuously spawns one chest per loaded chunk.
+     *
+     * @param main
+     */
     public Spawner(SupplyCrates main) {
 
         this.main = main;
@@ -42,17 +47,24 @@ public class Spawner extends BukkitRunnable {
         for (World world : worlds) {
             for (Location location : getRandomLocations(world)) {
                 spawnChestAt(location);
-                world.spawnParticle(Particle.EXPLOSION_HUGE, location, 5);
+                spawnParticleBeamAt(location);
                 world.playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
             }
         }
     }
 
+    /**
+     * Spawns a chest at the given location. Therefore an occurrence is calculated determining the chest type (e.g.
+     * white, green, blue, ...)
+     *
+     * @param location Location of the chest.
+     */
     private void spawnChestAt(Location location) {
 
         double occurrence = Math.random();
         String chest = "";
 
+        // Compares a random value with chest probabilities defined in the config.yml
         for (KeyValuePair chestOccurrence : chestOccurrences) {
             double currentOccurrence = Double.valueOf(chestOccurrence.getValue());
             if (occurrence <= currentOccurrence) {
@@ -67,6 +79,30 @@ public class Spawner extends BukkitRunnable {
 
     }
 
+    /**
+     * Spawns a beam of light at the given location to mark the chest.
+     *
+     * @param location Location of the beam
+     */
+    private void spawnParticleBeamAt(Location location) {
+
+        World world = location.getWorld();
+        int r = 1;
+        for (double y = 0; y <= 50; y += 0.5) {
+            double x = r * Math.cos(y);
+            double z = r * Math.sin(y);
+            Location currentLocation = new Location(world, location.getX() + x, location.getY() + y, location.getZ() + z);
+            world.spawnParticle(Particle.REDSTONE, currentLocation, 1);
+        }
+
+    }
+
+    /**
+     * Returns one location inside each loaded chunk.
+     *
+     * @param world World containing the chunks and therefore the locations
+     * @return A list containing one location per chunk
+     */
     private List<Location> getRandomLocations(World world) {
 
         Chunk[] chunks = world.getLoadedChunks();
@@ -85,6 +121,10 @@ public class Spawner extends BukkitRunnable {
 
     }
 
+    /**
+     * Spawns a chest in the constructor and removes it again when the run method is called (-> needs to be executed
+     * with a delay).
+     */
     class ChestSpawner extends BukkitRunnable {
 
         private Material oldBlock;
