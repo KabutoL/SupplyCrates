@@ -8,6 +8,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -139,6 +140,7 @@ public class Spawner extends BukkitRunnable {
             this.oldBlock = block.getType();
 
             block.setType(Material.CHEST);
+            block.setMetadata("SupplyCrate", new FixedMetadataValue(main, true));
             Chest chest = (Chest) block.getState();
             Inventory chestInventory = chest.getInventory();
 
