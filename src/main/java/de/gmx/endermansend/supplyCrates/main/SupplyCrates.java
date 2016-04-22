@@ -13,7 +13,8 @@ public class SupplyCrates extends JavaPlugin {
 
         config = new ConfigHandler(this);
 
-        (new Spawner(this)).runTaskTimer(this, 0L, 200L);
+        // TODO: Maybe use a config value instead of 100L
+        (new Spawner(this)).runTaskTimer(this, 100L, 200L);
 
         getLogger().info("Enabled");
 

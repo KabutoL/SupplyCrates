@@ -16,14 +16,17 @@ public class GetValuesFromConfig {
         this.config = config;
     }
 
+    public int presenceTime() {
+        return config.getIntFromConfig("PRESENCE_PERIOD");
+    }
+
     /**
      * Gets all chests types defined in the config.
      *
      * @return List of chest names
      */
     public List<String> chests() {
-        Set<String> chests = config.getConfigurationSectionFromConfig("").getKeys(false);
-        chests.remove("GENERAL_PROBABILITY");
+        Set<String> chests = config.getConfigurationSectionFromConfig("CHESTS").getKeys(false);
         return new ArrayList<String>(chests);
     }
 
@@ -35,7 +38,7 @@ public class GetValuesFromConfig {
      */
     public List<Material> itemDropsFor(String chest) {
 
-        Set<String> materialNames = config.getConfigurationSectionFromConfig(chest.toUpperCase()).getKeys(false);
+        Set<String> materialNames = config.getConfigurationSectionFromConfig("CHESTS." + chest.toUpperCase()).getKeys(false);
 
         List<Material> materials = new ArrayList<Material>();
 
@@ -61,7 +64,7 @@ public class GetValuesFromConfig {
     public HashMap<Integer, Double> itemOccurrence(String chest, String material) {
 
         HashMap<Integer, Double> occurrences = new HashMap<Integer, Double>();
-        ConfigurationSection section = config.getConfigurationSectionFromConfig(chest.toUpperCase() + "." + material);
+        ConfigurationSection section = config.getConfigurationSectionFromConfig("CHESTS." + chest.toUpperCase() + "." + material);
 
         for (String key : section.getKeys(false))
             occurrences.put(Integer.parseInt(key), (Double) section.get(key));
@@ -72,7 +75,7 @@ public class GetValuesFromConfig {
 
     public double dropProbability(String chest) {
 
-        return config.getDoubleFromConfig(chest.toUpperCase() + ".PROBABILITY");
+        return config.getDoubleFromConfig("CHESTS." + chest.toUpperCase() + ".PROBABILITY");
 
     }
 

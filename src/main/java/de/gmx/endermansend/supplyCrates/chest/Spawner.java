@@ -75,7 +75,8 @@ public class Spawner extends BukkitRunnable {
         }
 
         System.out.println(location);
-        (new ChestSpawner(location, itemHandler.createItemStacksFor(chest))).runTaskTimerAsynchronously(main, 18000L, 0L);
+        long presenceTime = config.get.presenceTime() * 3;
+        (new ChestSpawner(location, itemHandler.createItemStacksFor(chest))).runTaskTimer(main, presenceTime, 0L);
 
     }
 
@@ -132,6 +133,7 @@ public class Spawner extends BukkitRunnable {
         private Location location;
 
         public ChestSpawner(Location location, List<ItemStack> items) {
+            System.out.println(location.getY());
             this.location = location;
             Block block = location.getBlock();
             this.oldBlock = block.getType();
@@ -146,7 +148,9 @@ public class Spawner extends BukkitRunnable {
         }
 
         public void run() {
-            location.getBlock().setType(oldBlock);
+            Block block = location.getBlock();
+            if (block.getType() == Material.CHEST)
+                location.getBlock().setType(oldBlock);
             this.cancel();
         }
     }
