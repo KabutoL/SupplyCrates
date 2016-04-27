@@ -18,7 +18,7 @@ public class SupplyCrates extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new EmptyChestListener(), this);
 
         // TODO: Maybe use a config value instead of 100L
-        (new Spawner(this)).runTaskTimer(this, 100L, 200L);
+        (new Spawner(this)).runTaskTimer(this, 40L, 400L);
 
         getLogger().info("Enabled");
 

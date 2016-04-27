@@ -1,6 +1,6 @@
 # Reduce value to spawn less chests
 GENERAL_PROBABILITY: 0.5
-# Time until the chest despawns again
+# Time in seconds until the chest despawns again
 PRESENCE_PERIOD: 15
 
 # Probabilities for a certain colored chest

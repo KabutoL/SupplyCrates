@@ -48,6 +48,7 @@ public class Spawner extends BukkitRunnable {
         for (World world : worlds) {
             for (Location location : getRandomLocations(world)) {
                 spawnChestAt(location);
+                (new ParticleSpawner(location)).runTaskTimerAsynchronously(main, 20L, 20L);
                 spawnParticleBeamAt(location);
                 world.playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
             }
@@ -76,7 +77,7 @@ public class Spawner extends BukkitRunnable {
         }
 
         System.out.println(location);
-        long presenceTime = config.get.presenceTime() * 3;
+        long presenceTime = config.get.presenceTime() * 20;
         (new ChestSpawner(location, itemHandler.createItemStacksFor(chest))).runTaskTimer(main, presenceTime, 0L);
 
     }
@@ -111,13 +112,19 @@ public class Spawner extends BukkitRunnable {
 
         List<Location> locations = new ArrayList<Location>(chunks.length);
 
+        int i = 0;
+        int interval = 20;
         for (Chunk chunk : chunks) {
-            Location location = new Location(world,
-                    chunk.getX() + (int) (Math.random() * 16),
-                    0,
-                    chunk.getZ() + (int) (Math.random() * 16));
-            locations.add(world.getHighestBlockAt(location.add(0, 1, 0)).getLocation());
+            i += (Math.random() * interval);
+            if (i++ % interval == 0) {
+                Location location = new Location(world,
+                        chunk.getX() * 16 + (int) (Math.random() * 16),
+                        80,
+                        chunk.getZ() * 16 + (int) (Math.random() * 16));
+                locations.add(world.getHighestBlockAt(location.add(0, 1, 0)).getLocation());
+            }
         }
+        locations.add(new Location(world, 1, world.getHighestBlockYAt(1, 1), 1));
 
         return locations;
 
@@ -134,7 +141,6 @@ public class Spawner extends BukkitRunnable {
         private Location location;
 
         public ChestSpawner(Location location, List<ItemStack> items) {
-            System.out.println(location.getY());
             this.location = location;
             Block block = location.getBlock();
             this.oldBlock = block.getType();
@@ -151,10 +157,27 @@ public class Spawner extends BukkitRunnable {
 
         public void run() {
             Block block = location.getBlock();
-            if (block.getType() == Material.CHEST)
+            if (block.getState() instanceof Chest) {
+                Chest chest = (Chest) block.getState();
+                chest.getInventory().clear();
                 location.getBlock().setType(oldBlock);
+            }
             this.cancel();
         }
+    }
+
+    class ParticleSpawner extends BukkitRunnable {
+
+        Location location;
+
+        ParticleSpawner(Location location) {
+            this.location = location;
+        }
+
+        public void run() {
+            spawnParticleBeamAt(location);
+        }
+
     }
 
 }
