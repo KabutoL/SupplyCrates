@@ -11,7 +11,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Spawner extends BukkitRunnable {
+public class SpawnCoordinator extends BukkitRunnable {
 
     private SupplyCrates main;
 
@@ -19,7 +19,7 @@ public class Spawner extends BukkitRunnable {
 
     private ItemHandler itemHandler;
 
-    private SupplyDrop supplyDrop;
+    private SpawnedChestTracker spawnedChestTracker;
 
     private List<World> worlds;
 
@@ -30,13 +30,13 @@ public class Spawner extends BukkitRunnable {
      *
      * @param main
      */
-    public Spawner(SupplyCrates main) {
+    public SpawnCoordinator(SupplyCrates main) {
 
         this.main = main;
         config = main.getConfigHandler();
         itemHandler = new ItemHandler(main);
 
-        supplyDrop = new SupplyDrop(main, itemHandler);
+        spawnedChestTracker = new SpawnedChestTracker(main, itemHandler);
 
         worlds = main.getServer().getWorlds();
         chestOccurrences = new ArrayList<KeyValuePair>();
@@ -70,7 +70,7 @@ public class Spawner extends BukkitRunnable {
 
                 System.out.println(location);
 
-                supplyDrop.dropNewSupplyChest(chest, location, itemHandler.createItemStacksFor(chest));
+                spawnedChestTracker.dropNewSupplyChest(chest, location, itemHandler.createItemStacksFor(chest));
 
             }
         }
@@ -101,6 +101,8 @@ public class Spawner extends BukkitRunnable {
                 locations.add(world.getHighestBlockAt(location.add(0, 1, 0)).getLocation());
             }
         }
+
+        // TODO: Remove debug spawn
         locations.add(new Location(world, 1, world.getHighestBlockYAt(1, 1), 1));
 
         return locations;

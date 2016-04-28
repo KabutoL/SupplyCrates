@@ -15,7 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
 
-public class SupplyDrop {
+public class SpawnedChestTracker {
 
     private SupplyCrates main;
 
@@ -25,7 +25,7 @@ public class SupplyDrop {
 
     private long particleFrequency = 20L;
 
-    public SupplyDrop(SupplyCrates main, ItemHandler itemHandler) {
+    public SpawnedChestTracker(SupplyCrates main, ItemHandler itemHandler) {
 
         this.main = main;
         this.itemHandler = itemHandler;
