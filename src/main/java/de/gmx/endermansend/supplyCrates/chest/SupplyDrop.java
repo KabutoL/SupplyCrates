@@ -2,15 +2,13 @@ package de.gmx.endermansend.supplyCrates.chest;
 
 import de.gmx.endermansend.supplyCrates.config.ConfigHandler;
 import de.gmx.endermansend.supplyCrates.main.SupplyCrates;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
@@ -81,9 +79,23 @@ public class SupplyDrop {
         public void run() {
             Block block = location.getBlock();
             if (block.getState() instanceof Chest) {
+
                 Chest chest = (Chest) block.getState();
-                chest.getInventory().clear();
-                location.getBlock().setType(oldBlock);
+                List<MetadataValue> meta = chest.getMetadata("SupplyCrate");
+
+                if (meta != null && !meta.isEmpty()) {
+                    for (MetadataValue s : meta) {
+                        if (s.asBoolean()) {
+
+                            chest.getInventory().clear();
+                            location.getWorld().playEffect(location, Effect.EXTINGUISH, null);
+                            location.getBlock().setType(oldBlock);
+                            
+                        }
+                    }
+                }
+
+
             }
             particleSpawner.cancel();
             this.cancel();
