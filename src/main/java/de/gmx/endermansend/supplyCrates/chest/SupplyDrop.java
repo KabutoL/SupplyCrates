@@ -113,12 +113,34 @@ public class SupplyDrop {
         private void spawnParticleBeamAt(Location location) {
 
             World world = location.getWorld();
+            int maxHeight = world.getMaxHeight();
             int r = 1;
-            for (double y = 0; y <= 50; y += 0.5) {
+
+            for (double y = location.getY(); y <= maxHeight; y += 2.0) {
                 double x = r * Math.cos(y);
                 double z = r * Math.sin(y);
-                Location currentLocation = new Location(world, location.getX() + x, location.getY() + y, location.getZ() + z);
-                world.spawnParticle(Particle.REDSTONE, currentLocation, 1);
+                r += 0.1;
+
+                world.spawnParticle(
+                        Particle.REDSTONE,
+                        new Location(
+                                world,
+                                location.getX() + x,
+                                y,
+                                location.getZ() + z
+                        ),
+                        1,
+                        1.5, 0, 1.5);
+                world.spawnParticle(
+                        Particle.REDSTONE,
+                        new Location(
+                                world,
+                                location.getX() - x,
+                                y,
+                                location.getZ() - z
+                        ),
+                        1,
+                        1.5, 0, 1.5);
             }
 
         }
