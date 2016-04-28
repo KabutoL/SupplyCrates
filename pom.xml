@@ -24,8 +24,8 @@
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
-            <artifactId>minecraft-server</artifactId>
-            <version>1.9-SNAPSHOT</version>
+            <artifactId>spigot</artifactId>
+            <version>1.9-R0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
