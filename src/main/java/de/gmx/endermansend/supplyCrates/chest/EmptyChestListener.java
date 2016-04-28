@@ -1,6 +1,6 @@
 package de.gmx.endermansend.supplyCrates.chest;
 
-import org.bukkit.Material;
+import org.bukkit.Location;
 import org.bukkit.block.Chest;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -8,9 +8,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.MetadataValue;
-
-import java.util.List;
 
 public class EmptyChestListener implements Listener {
 
@@ -21,16 +18,11 @@ public class EmptyChestListener implements Listener {
         if (!(holder instanceof Chest))
             return;
 
-        Chest chest = (Chest) holder;
-
-        List<MetadataValue> meta = chest.getMetadata("SupplyCrate");
-
-        if (meta != null && !meta.isEmpty()) {
-            for (MetadataValue s : meta) {
-                if (s.asBoolean() && isEmpty(e.getInventory())) {
-                    chest.getBlock().setType(Material.AIR);
-                }
-            }
+        if (isEmpty(e.getInventory())) {
+            SpawnHelper.resetBlock(((Chest) holder).getBlock());
+            Location location = ((Chest) holder).getLocation();
+            location.add(0, -1, 0);
+            SpawnHelper.resetBlock(location.getBlock());
         }
 
     }

@@ -2,13 +2,15 @@ package de.gmx.endermansend.supplyCrates.chest;
 
 import de.gmx.endermansend.supplyCrates.config.ConfigHandler;
 import de.gmx.endermansend.supplyCrates.main.SupplyCrates;
-import org.bukkit.*;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
@@ -53,53 +55,39 @@ public class SupplyDrop {
      */
     class ChestSpawner extends BukkitRunnable {
 
-        private Material oldBlock;
-
         private Location location;
 
         private ParticleSpawner particleSpawner;
 
         public ChestSpawner(Location location, List<ItemStack> items, ParticleSpawner particleSpawner) {
+
+            // Process chest
             this.location = location;
             Block block = location.getBlock();
-            this.oldBlock = block.getType();
-
             this.particleSpawner = particleSpawner;
 
+            block.setMetadata("SupplyCrate", new FixedMetadataValue(main, block.getType().toString()));
             block.setType(Material.CHEST);
-            block.setMetadata("SupplyCrate", new FixedMetadataValue(main, true));
             Chest chest = (Chest) block.getState();
             Inventory chestInventory = chest.getInventory();
 
             for (ItemStack item : items)
                 chestInventory.addItem(item);
 
+            // Process glowstone
+            Block ground = (new Location(location.getWorld(), location.getX(), location.getY() - 1, location.getZ())).getBlock();
+            ground.setMetadata("SupplyCrate", new FixedMetadataValue(main, ground.getType().toString()));
+            ground.setType(Material.GLOWSTONE);
+
         }
 
         public void run() {
-            Block block = location.getBlock();
-            if (block.getState() instanceof Chest) {
-
-                Chest chest = (Chest) block.getState();
-                List<MetadataValue> meta = chest.getMetadata("SupplyCrate");
-
-                if (meta != null && !meta.isEmpty()) {
-                    for (MetadataValue s : meta) {
-                        if (s.asBoolean()) {
-
-                            chest.getInventory().clear();
-                            location.getWorld().playEffect(location, Effect.EXTINGUISH, null);
-                            location.getBlock().setType(oldBlock);
-                            
-                        }
-                    }
-                }
-
-
-            }
+            SpawnHelper.resetBlock(location.getBlock());
+            SpawnHelper.resetBlock((location.add(0, -1, 0).getBlock()));
             particleSpawner.cancel();
             this.cancel();
         }
+
     }
 
     /**
@@ -126,33 +114,31 @@ public class SupplyDrop {
 
             World world = location.getWorld();
             int maxHeight = world.getMaxHeight();
-            int r = 1;
+            double r = 1;
 
-            for (double y = location.getY(); y <= maxHeight; y += 2.0) {
+            for (double y = location.getY(); y <= maxHeight; y += 0.5) {
                 double x = r * Math.cos(y);
                 double z = r * Math.sin(y);
-                r += 0.1;
+                r += 0.05;
 
                 world.spawnParticle(
-                        Particle.REDSTONE,
+                        Particle.PORTAL,
                         new Location(
                                 world,
                                 location.getX() + x,
                                 y,
                                 location.getZ() + z
                         ),
-                        1,
-                        1.5, 0, 1.5);
+                        1);
                 world.spawnParticle(
-                        Particle.REDSTONE,
+                        Particle.PORTAL,
                         new Location(
                                 world,
                                 location.getX() - x,
                                 y,
                                 location.getZ() - z
                         ),
-                        1,
-                        1.5, 0, 1.5);
+                        1);
             }
 
         }
