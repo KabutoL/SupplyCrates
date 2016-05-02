@@ -1,5 +1,6 @@
-package de.gmx.endermansend.supplyCrates.chest;
+package de.gmx.endermansend.supplyCrates.listeners;
 
+import de.gmx.endermansend.supplyCrates.chest.SpawnHelper;
 import org.bukkit.Location;
 import org.bukkit.block.Chest;
 import org.bukkit.event.EventHandler;

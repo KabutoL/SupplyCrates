@@ -39,7 +39,7 @@ public class SpawnHelper {
      *
      * @param block The block that should be reset
      */
-    protected static void resetBlock(Block block) {
+    public static void resetBlock(Block block) {
 
         Material oldMaterial = SpawnHelper.getOriginalBlock(block);
         if (block.getState() instanceof Chest) {

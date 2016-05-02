@@ -125,11 +125,15 @@ public class SpawnedChestTracker {
                 deployNewSupplyChest(chest, location);
             } else {
 
-                location.getBlock().setType(previousMaterial);
-                location.add(0, 1, 0);
+                Block block = location.getBlock();
+                block.setType(previousMaterial);
+                block.removeMetadata("SupplyCrate", main);
+                location.add(0, -1, 0);
 
-                previousMaterial = location.getBlock().getType();
-                location.getBlock().setType(Material.CHEST);
+                block = location.getBlock();
+                previousMaterial = block.getType();
+                block.setType(Material.CHEST);
+                block.setMetadata("SupplyCrate", new FixedMetadataValue(main, true));
                 spawnParticleBeamAt(location);
 
             }
