@@ -13,11 +13,7 @@ import java.util.List;
 
 public class SpawnCoordinator extends BukkitRunnable {
 
-    private SupplyCrates main;
-
     private ConfigHandler config;
-
-    private ItemHandler itemHandler;
 
     private SpawnedChestTracker spawnedChestTracker;
 
@@ -27,16 +23,14 @@ public class SpawnCoordinator extends BukkitRunnable {
 
     /**
      * Continuously spawns one chest per loaded chunk.
-     *
-     * @param main
      */
-    public SpawnCoordinator(SupplyCrates main) {
+    public SpawnCoordinator() {
 
-        this.main = main;
+        SupplyCrates main = SupplyCrates.getInstance();
+
         config = main.getConfigHandler();
-        itemHandler = new ItemHandler(main);
 
-        spawnedChestTracker = new SpawnedChestTracker(main, itemHandler);
+        spawnedChestTracker = new SpawnedChestTracker();
 
         worlds = main.getServer().getWorlds();
         chestOccurrences = new ArrayList<KeyValuePair>();
@@ -70,7 +64,7 @@ public class SpawnCoordinator extends BukkitRunnable {
 
                 System.out.println(location);
 
-                spawnedChestTracker.dropNewSupplyChest(chest, location, itemHandler.createItemStacksFor(chest));
+                spawnedChestTracker.spawnDescendingChest(chest, location);
 
             }
         }

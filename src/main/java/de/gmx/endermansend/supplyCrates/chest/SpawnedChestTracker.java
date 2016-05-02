@@ -25,17 +25,23 @@ public class SpawnedChestTracker {
 
     private long particleFrequency = 20L;
 
-    public SpawnedChestTracker(SupplyCrates main, ItemHandler itemHandler) {
+    public SpawnedChestTracker() {
 
-        this.main = main;
-        this.itemHandler = itemHandler;
+        this.main = SupplyCrates.getInstance();
+        this.itemHandler = new ItemHandler();
 
         ConfigHandler config = main.getConfigHandler();
         presenceTime = config.get.presenceTime() * 20;
 
     }
 
-    public void dropNewSupplyChest(String chest, Location location, List<ItemStack> items) {
+    public void spawnDescendingChest(String chest, Location location) {
+
+        (new DescendingChest(chest, location)).runTaskTimer(main, 0L, 60L);
+
+    }
+
+    private void deployNewSupplyChest(String chest, Location location) {
 
         ParticleSpawner particleSpawner = new ParticleSpawner(location);
 
@@ -47,6 +53,87 @@ public class SpawnedChestTracker {
 
         particleSpawner.runTaskTimerAsynchronously(main, particleFrequency, particleFrequency);
 
+    }
+
+    /**
+     * Spawns a beam of light at the given location to mark the chest.
+     *
+     * @param location Location of the beam
+     */
+    private void spawnParticleBeamAt(Location location) {
+
+        World world = location.getWorld();
+        int maxHeight = world.getMaxHeight();
+        double r = 1;
+
+        for (double y = location.getY(); y <= maxHeight; y += 0.5) {
+            double x = r * Math.cos(y);
+            double z = r * Math.sin(y);
+            r += 0.05;
+
+            world.spawnParticle(
+                    Particle.PORTAL,
+                    new Location(
+                            world,
+                            location.getX() + x,
+                            y,
+                            location.getZ() + z
+                    ),
+                    1);
+            world.spawnParticle(
+                    Particle.PORTAL,
+                    new Location(
+                            world,
+                            location.getX() - x,
+                            y,
+                            location.getZ() - z
+                    ),
+                    1);
+        }
+
+    }
+
+    /**
+     * Spawns a chest at the highest possible block and lets it descend.
+     */
+    class DescendingChest extends BukkitRunnable {
+
+        private Location location;
+        private World world;
+
+        private double highestBlock;
+
+        private Material previousMaterial;
+
+        private String chest;
+
+        public DescendingChest(String chest, Location location) {
+
+            this.location = location;
+            this.world = location.getWorld();
+            this.location.setY(world.getMaxHeight());
+            previousMaterial = location.getBlock().getType();
+            highestBlock = world.getHighestBlockYAt(location);
+
+            this.chest = chest;
+
+        }
+
+        public void run() {
+
+            if (location.getY() <= highestBlock) {
+                deployNewSupplyChest(chest, location);
+            } else {
+
+                location.getBlock().setType(previousMaterial);
+                location.add(0, 1, 0);
+
+                previousMaterial = location.getBlock().getType();
+                location.getBlock().setType(Material.CHEST);
+                spawnParticleBeamAt(location);
+
+            }
+        }
     }
 
     /**
@@ -103,44 +190,6 @@ public class SpawnedChestTracker {
 
         public void run() {
             spawnParticleBeamAt(location);
-        }
-
-        /**
-         * Spawns a beam of light at the given location to mark the chest.
-         *
-         * @param location Location of the beam
-         */
-        private void spawnParticleBeamAt(Location location) {
-
-            World world = location.getWorld();
-            int maxHeight = world.getMaxHeight();
-            double r = 1;
-
-            for (double y = location.getY(); y <= maxHeight; y += 0.5) {
-                double x = r * Math.cos(y);
-                double z = r * Math.sin(y);
-                r += 0.05;
-
-                world.spawnParticle(
-                        Particle.PORTAL,
-                        new Location(
-                                world,
-                                location.getX() + x,
-                                y,
-                                location.getZ() + z
-                        ),
-                        1);
-                world.spawnParticle(
-                        Particle.PORTAL,
-                        new Location(
-                                world,
-                                location.getX() - x,
-                                y,
-                                location.getZ() - z
-                        ),
-                        1);
-            }
-
         }
 
     }

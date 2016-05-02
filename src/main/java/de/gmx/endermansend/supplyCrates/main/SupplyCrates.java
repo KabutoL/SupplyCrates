@@ -8,17 +8,21 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class SupplyCrates extends JavaPlugin {
 
+    private static SupplyCrates instance;
+
     private ConfigHandler config;
 
     @Override
     public void onEnable() {
+
+        instance = this;
 
         config = new ConfigHandler(this);
 
         Bukkit.getPluginManager().registerEvents(new EmptyChestListener(), this);
 
         // TODO: Maybe use a config value instead of 100L
-        (new SpawnCoordinator(this)).runTaskTimer(this, 40L, 400L);
+        (new SpawnCoordinator()).runTaskTimer(this, 40L, 400L);
 
         getLogger().info("Enabled");
 
@@ -31,6 +35,10 @@ public class SupplyCrates extends JavaPlugin {
 
     public ConfigHandler getConfigHandler() {
         return config;
+    }
+
+    public static SupplyCrates getInstance() {
+        return instance;
     }
 
 }

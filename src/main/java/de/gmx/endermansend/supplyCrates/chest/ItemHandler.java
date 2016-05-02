@@ -14,8 +14,8 @@ public class ItemHandler {
 
     ConfigHandler config;
 
-    public ItemHandler(SupplyCrates main) {
-        config = main.getConfigHandler();
+    public ItemHandler() {
+        config = SupplyCrates.getInstance().getConfigHandler();
     }
 
     public List<ItemStack> createItemStacksFor(String chest) {
