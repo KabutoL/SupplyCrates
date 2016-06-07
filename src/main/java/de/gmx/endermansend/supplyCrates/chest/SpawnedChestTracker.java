@@ -17,6 +17,10 @@ import java.util.List;
 
 public class SpawnedChestTracker {
 
+    // Meta keys used by this plugin
+    private static String metaKeyWasSpawnedByThisPlugin = "wasSpawnedByThisPlugin";
+    private static String metaKeyMaterial = "Material";
+
     private SupplyCrates main;
 
     private ItemHandler itemHandler;
@@ -31,8 +35,16 @@ public class SpawnedChestTracker {
         this.itemHandler = new ItemHandler();
 
         ConfigHandler config = main.getConfigHandler();
-        presenceTime = config.get.presenceTime() * 20;
+        presenceTime = config.get.presenceTime();
 
+    }
+
+    public static String getMetaKeyWasSpawnedByThisPlugin() {
+        return metaKeyWasSpawnedByThisPlugin;
+    }
+
+    public static String getMetaKeyMaterial() {
+        return metaKeyMaterial;
     }
 
     public void spawnDescendingChest(String chest, Location location) {
@@ -41,17 +53,13 @@ public class SpawnedChestTracker {
 
     }
 
-    private void deployNewSupplyChest(String chest, Location location) {
-
-        ParticleSpawner particleSpawner = new ParticleSpawner(location);
+    private void deployNewSupplyChest(String chest, Location location, ParticleSpawner particleSpawner) {
 
         (new ChestSpawner(
                 location,
                 itemHandler.createItemStacksFor(chest),
                 particleSpawner
         )).runTaskTimer(main, presenceTime, 0L);
-
-        particleSpawner.runTaskTimerAsynchronously(main, particleFrequency, particleFrequency);
 
     }
 
@@ -94,11 +102,11 @@ public class SpawnedChestTracker {
     }
 
     /**
-     * Spawns a chest at the highest possible block and lets it descend.
+     * Spawns a chest with a particle beam (ParticleSpawner) at the highest possible block and lets it descend.
      */
     class DescendingChest extends BukkitRunnable {
 
-        private Location location;
+        private Location currentChestLocation;
         private World world;
 
         private double highestBlock;
@@ -107,37 +115,53 @@ public class SpawnedChestTracker {
 
         private String chest;
 
+        private ParticleSpawner particleSpawner;
+
         public DescendingChest(String chest, Location location) {
 
-            this.location = location;
+            currentChestLocation = location;
             this.world = location.getWorld();
-            this.location.setY(world.getMaxHeight());
+            currentChestLocation.setY(world.getMaxHeight());
             previousMaterial = location.getBlock().getType();
             highestBlock = world.getHighestBlockYAt(location);
 
             this.chest = chest;
 
+            particleSpawner = new ParticleSpawner(new Location(world, location.getX(), highestBlock, location.getZ()));
+            particleSpawner.runTaskTimerAsynchronously(main, particleFrequency, particleFrequency);
+
         }
 
+        /**
+         * Lets the chest descend by one block or spawns a chest with loot if the ground was reached.
+         */
         public void run() {
 
-            if (location.getY() <= highestBlock) {
-                deployNewSupplyChest(chest, location);
+            // Chest reached the ground
+            if (currentChestLocation.getY() <= highestBlock) {
+
+                Block block = currentChestLocation.getBlock();
+                block.setType(previousMaterial);
+                block.removeMetadata(getMetaKeyWasSpawnedByThisPlugin(), main);
+
+                deployNewSupplyChest(chest, currentChestLocation, particleSpawner);
+                this.cancel();
+
             } else {
 
-                Block block = location.getBlock();
+                Block block = currentChestLocation.getBlock();
                 block.setType(previousMaterial);
-                block.removeMetadata("SupplyCrate", main);
-                location.add(0, -1, 0);
+                block.removeMetadata(getMetaKeyWasSpawnedByThisPlugin(), main);
+                currentChestLocation.add(0, -1, 0);
 
-                block = location.getBlock();
+                block = currentChestLocation.getBlock();
                 previousMaterial = block.getType();
                 block.setType(Material.CHEST);
-                block.setMetadata("SupplyCrate", new FixedMetadataValue(main, true));
-                spawnParticleBeamAt(location);
+                block.setMetadata(getMetaKeyWasSpawnedByThisPlugin(), new FixedMetadataValue(main, true));
 
             }
         }
+
     }
 
     /**
@@ -157,7 +181,8 @@ public class SpawnedChestTracker {
             Block block = location.getBlock();
             this.particleSpawner = particleSpawner;
 
-            block.setMetadata("SupplyCrate", new FixedMetadataValue(main, block.getType().toString()));
+            block.setMetadata(getMetaKeyMaterial(), new FixedMetadataValue(main, block.getType().toString()));
+            block.setMetadata(getMetaKeyWasSpawnedByThisPlugin(), new FixedMetadataValue(main, true));
             block.setType(Material.CHEST);
             Chest chest = (Chest) block.getState();
             Inventory chestInventory = chest.getInventory();
@@ -167,7 +192,8 @@ public class SpawnedChestTracker {
 
             // Process glowstone
             Block ground = (new Location(location.getWorld(), location.getX(), location.getY() - 1, location.getZ())).getBlock();
-            ground.setMetadata("SupplyCrate", new FixedMetadataValue(main, ground.getType().toString()));
+            ground.setMetadata(getMetaKeyMaterial(), new FixedMetadataValue(main, ground.getType().toString()));
+            ground.setMetadata(getMetaKeyWasSpawnedByThisPlugin(), new FixedMetadataValue(main, true));
             ground.setType(Material.GLOWSTONE);
 
         }

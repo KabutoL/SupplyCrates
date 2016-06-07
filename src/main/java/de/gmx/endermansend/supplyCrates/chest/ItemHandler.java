@@ -9,30 +9,46 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class ItemHandler {
 
-    ConfigHandler config;
+    private ConfigHandler config;
+
+    private Logger logger;
 
     public ItemHandler() {
-        config = SupplyCrates.getInstance().getConfigHandler();
+        SupplyCrates instance = SupplyCrates.getInstance();
+        config = instance.getConfigHandler();
+        logger = instance.getLogger();
     }
 
+    /**
+     * Gets occurrences of the specified chest from config and creates a list of item stacks with it. The process is
+     * rerun until at least one ItemStack was added.
+     *
+     * @param chest Type of the chest
+     * @return List of ItemStacks with at least one entry
+     */
     public List<ItemStack> createItemStacksFor(String chest) {
 
         List<ItemStackWrapper> itemStacks = new ArrayList<ItemStackWrapper>();
 
-        List<Material> materials = config.get.itemDropsFor(chest);
-        for (Material material : materials) {
-            if (material == null) {
-                System.out.println("Wrong material name");
-                continue;
+        while (itemStacks.isEmpty()) {
+
+            List<Material> materials = config.get.itemDropsFor(chest);
+            for (Material material : materials) {
+                if (material == null) {
+                    logger.warning("Wrong material name");
+                    continue;
+                }
+                HashMap<Integer, Double> occurrences = config.get.itemOccurrence(chest, material.name());
+                if (occurrences == null)
+                    continue;
+                for (ItemStack item : getItemStacksFor(material, occurrences))
+                    itemStacks.add(new ItemStackWrapper(item));
             }
-            HashMap<Integer, Double> occurrences = config.get.itemOccurrence(chest, material.name());
-            if (occurrences == null)
-                continue;
-            for (ItemStack item : getItemStacksFor(material, occurrences))
-                itemStacks.add(new ItemStackWrapper(item));
+
         }
 
         return packItemStacks(itemStacks);

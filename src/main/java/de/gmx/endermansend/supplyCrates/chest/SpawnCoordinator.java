@@ -45,7 +45,6 @@ public class SpawnCoordinator extends BukkitRunnable {
      */
     public void run() {
 
-        System.out.println("___________________");
         for (World world : worlds) {
             for (Location location : getRandomLocations(world)) {
 
@@ -61,8 +60,6 @@ public class SpawnCoordinator extends BukkitRunnable {
                     } else
                         occurrence -= currentOccurrence;
                 }
-
-                System.out.println(location);
 
                 spawnedChestTracker.spawnDescendingChest(chest, location);
 

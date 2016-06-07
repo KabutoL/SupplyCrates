@@ -1,5 +1,6 @@
 package de.gmx.endermansend.supplyCrates.chest;
 
+import de.gmx.endermansend.supplyCrates.main.SupplyCrates;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -8,6 +9,9 @@ import org.bukkit.block.Chest;
 import org.bukkit.metadata.MetadataValue;
 
 import java.util.List;
+
+import static de.gmx.endermansend.supplyCrates.chest.SpawnedChestTracker.getMetaKeyMaterial;
+import static de.gmx.endermansend.supplyCrates.chest.SpawnedChestTracker.getMetaKeyWasSpawnedByThisPlugin;
 
 public class SpawnHelper {
 
@@ -19,14 +23,13 @@ public class SpawnHelper {
      */
     private static Material getOriginalBlock(Block block) {
 
-        List<MetadataValue> meta = block.getMetadata("SupplyCrate");
+        List<MetadataValue> meta = block.getMetadata("Material");
         Material material = null;
         if (meta != null && !meta.isEmpty()) {
             for (MetadataValue m : meta) {
                 try {
                     material = Material.valueOf(m.asString());
                 } catch (IllegalArgumentException e) {
-                    return null;
                 }
             }
         }
@@ -42,13 +45,18 @@ public class SpawnHelper {
     public static void resetBlock(Block block) {
 
         Material oldMaterial = SpawnHelper.getOriginalBlock(block);
+
         if (block.getState() instanceof Chest) {
             Location location = block.getLocation();
             ((Chest) block.getState()).getInventory().clear();
             location.getWorld().playEffect(location, Effect.EXTINGUISH, null);
         } else if (block.getType() != Material.GLOWSTONE)
             return;
-        block.setType(oldMaterial);
+
+        if (oldMaterial != null)
+            block.setType(oldMaterial);
+        block.removeMetadata(getMetaKeyWasSpawnedByThisPlugin(), SupplyCrates.getInstance());
+        block.removeMetadata(getMetaKeyMaterial(), SupplyCrates.getInstance());
 
     }
 

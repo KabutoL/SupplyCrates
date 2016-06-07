@@ -9,6 +9,8 @@ import org.bukkit.metadata.MetadataValue;
 
 import java.util.List;
 
+import static de.gmx.endermansend.supplyCrates.chest.SpawnedChestTracker.getMetaKeyWasSpawnedByThisPlugin;
+
 /**
  * Prevents players from breaking a supply chests.
  */
@@ -19,10 +21,10 @@ public class BlockBreakListener implements Listener {
 
         Block block = e.getBlock();
 
-        if (block.getType() != Material.CHEST)
+        if (block.getType() != Material.CHEST && block.getType() != Material.GLOWSTONE)
             return;
 
-        List<MetadataValue> metaData = block.getMetadata("SupplyCrate");
+        List<MetadataValue> metaData = block.getMetadata(getMetaKeyWasSpawnedByThisPlugin());
 
         for (MetadataValue metadataValue : metaData) {
             if (metadataValue.asBoolean()) {

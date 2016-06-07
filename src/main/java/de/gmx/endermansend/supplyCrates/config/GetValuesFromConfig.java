@@ -16,8 +16,22 @@ public class GetValuesFromConfig {
         this.config = config;
     }
 
+    /**
+     * Gets the presence time for chests. Converts it from seconds to game ticks.
+     *
+     * @return Time interval in game ticks
+     */
     public int presenceTime() {
-        return config.getIntFromConfig("PRESENCE_PERIOD");
+        return config.getIntFromConfig("PRESENCE_PERIOD") * 20;
+    }
+
+    /**
+     * Gets the spawn interval for chests. Converts it from seconds to game ticks.
+     *
+     * @return Time interval in game ticks
+     */
+    public int spawnInterval() {
+        return config.getIntFromConfig("SPAWN_INTERVAL") * 20;
     }
 
     /**
