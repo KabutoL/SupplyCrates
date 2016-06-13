@@ -10,10 +10,10 @@ import java.util.Set;
 
 public class GetValuesFromConfig {
 
-    ConfigHandler config;
+    ConfigHandler configHandler;
 
-    GetValuesFromConfig(ConfigHandler config) {
-        this.config = config;
+    GetValuesFromConfig(ConfigHandler configHandler) {
+        this.configHandler = configHandler;
     }
 
     /**
@@ -22,7 +22,7 @@ public class GetValuesFromConfig {
      * @return Time interval in game ticks
      */
     public int presenceTime() {
-        return config.getIntFromConfig("PRESENCE_PERIOD") * 20;
+        return configHandler.getIntFromConfig(configHandler.config, "PRESENCE_PERIOD") * 20;
     }
 
     /**
@@ -31,16 +31,16 @@ public class GetValuesFromConfig {
      * @return Time interval in game ticks
      */
     public int spawnInterval() {
-        return config.getIntFromConfig("SPAWN_INTERVAL") * 20;
+        return configHandler.getIntFromConfig(configHandler.config, "SPAWN_INTERVAL") * 20;
     }
 
     /**
-     * Gets all chests types defined in the config.
+     * Gets all chests types defined in the configHandler.
      *
      * @return List of chest names
      */
     public List<String> chests() {
-        Set<String> chests = config.getConfigurationSectionFromConfig("CHESTS").getKeys(false);
+        Set<String> chests = configHandler.getConfigurationSectionFromConfig(configHandler.chestConfig, "").getKeys(false);
         return new ArrayList<String>(chests);
     }
 
@@ -52,7 +52,7 @@ public class GetValuesFromConfig {
      */
     public List<Material> itemDropsFor(String chest) {
 
-        Set<String> materialNames = config.getConfigurationSectionFromConfig("CHESTS." + chest.toUpperCase()).getKeys(false);
+        Set<String> materialNames = configHandler.getConfigurationSectionFromConfig(configHandler.chestConfig, chest.toUpperCase()).getKeys(false);
 
         List<Material> materials = new ArrayList<Material>();
 
@@ -78,7 +78,7 @@ public class GetValuesFromConfig {
     public HashMap<Integer, Double> itemOccurrence(String chest, String material) {
 
         HashMap<Integer, Double> occurrences = new HashMap<Integer, Double>();
-        ConfigurationSection section = config.getConfigurationSectionFromConfig("CHESTS." + chest.toUpperCase() + "." + material);
+        ConfigurationSection section = configHandler.getConfigurationSectionFromConfig(configHandler.chestConfig,  chest.toUpperCase() + "." + material);
 
         for (String key : section.getKeys(false))
             occurrences.put(Integer.parseInt(key), (Double) section.get(key));
@@ -88,9 +88,7 @@ public class GetValuesFromConfig {
     }
 
     public double dropProbability(String chest) {
-
-        return config.getDoubleFromConfig("CHESTS." + chest.toUpperCase() + ".PROBABILITY");
-
+        return configHandler.getDoubleFromConfig(configHandler.chestConfig, chest.toUpperCase() + ".PROBABILITY");
     }
 
 }
